@@ -1,0 +1,51 @@
+# Build directories
+build/
+debug/
+release/
+out/
+bin/
+obj/
+*.build/
+
+# Qt Creator
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.settings
+*.creator
+*.creator.user*
+
+# Generated files
+moc_*
+ui_*
+qrc_*
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# QML
+*.qmlc
+*.jsc
+qmlcache/
+*.qmltypes
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+CMakeLists.txt.user
+
+# Other
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+build/
