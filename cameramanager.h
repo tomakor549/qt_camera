@@ -26,7 +26,6 @@ public:
                          QObject *parent = nullptr);
 
   QVideoSink *previewVideoSink() const;
-  QVideoFrame getLastFrame() const { return _sink.videoFrame(); }
 
 public slots:
   void setPreviewVideoSink(QVideoSink *sink);
@@ -38,7 +37,9 @@ public slots:
 
 signals:
   void videoSinkChanged();
-  void CameraErrorOccurred(const QString &errorString);
+  void newFrameAvailable(const QVideoFrame &frame);
+  void newFrameAsImageAvailable(const QImage &image);
+  void cameraErrorOccurred(const QString &errorString);
 
 private slots:
   void onVideoFrameChanged(const QVideoFrame &frame);

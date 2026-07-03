@@ -9,6 +9,8 @@ Window {
     visible: true
     title: qsTr("Podgląd kamery")
 
+    signal setVideoSink
+
     CameraManager {
         id: cameraManager
     }

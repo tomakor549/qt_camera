@@ -56,7 +56,7 @@ void CameraManager::start(const QString &cameraId) {
   QCameraDevice selected;
 
   if (cameraId.isEmpty()) {
-    emit CameraErrorOccurred("Source camera is not selected");
+    emit cameraErrorOccurred("Source camera is not selected");
     return;
   }
 
@@ -66,7 +66,7 @@ void CameraManager::start(const QString &cameraId) {
 
   if (it == cameras.end()) {
     qDebug() << "Camera not found:" << cameraId;
-    emit CameraErrorOccurred("Camera not found");
+    emit cameraErrorOccurred("Camera not found");
     return;
   }
 
@@ -135,10 +135,13 @@ void CameraManager::onVideoFrameChanged(const QVideoFrame &frame) {
     return;
   }
 
-  if (_recorder.recorderState() == QMediaRecorder::RecordingState) {
-    // Format_RGB32 - alpha not needed
-    QImage image = frame.toImage();
+  emit newFrameAvailable(frame);
 
+  // Format_RGB32 - alpha not needed
+  QImage image = frame.toImage();
+  emit newFrameAsImageAvailable(image);
+
+  if (_recorder.recorderState() == QMediaRecorder::RecordingState) {
     setWatermark(image, 0.8);
 
     QVideoFrame frame_with_watermark(image);
@@ -158,11 +161,9 @@ void CameraManager::setWatermark(QImage &image, qreal opacity) {
     QPainter painter(&image);
     painter.setOpacity(opacity);
 
-    // Ustalamy pozycję (np. prawy dolny róg z marginesem 20 pikseli)
     int x = image.width() - _watermark.width() - 20;
     int y = image.height() - _watermark.height() - 20;
 
-    // Rysujemy watermark (wspiera przezroczystość PNG)
     painter.drawImage(x, y, _watermark);
     painter.end();
   }
