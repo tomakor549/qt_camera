@@ -88,6 +88,7 @@ void CameraManager::start(const QString &cameraId) {
 }
 
 void CameraManager::stop() {
+  stopRecord();
   _camera.stop();
   if (_preview_video_sink) {
     _preview_video_sink->setVideoFrame(QVideoFrame());
@@ -102,7 +103,7 @@ void CameraManager::startRecord(const QString &directory, QString fileName) {
 
   QMediaFormat format;
   format.setFileFormat(QMediaFormat::MPEG4);
-  format.setVideoCodec(QMediaFormat::VideoCodec::H264);
+  format.setVideoCodec(QMediaFormat::VideoCodec::H265);
   fileName += ".mp4";
 
   const QString filePath = QDir(directory).filePath(fileName);

@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(QT_QML_GENERATE_QMLLS_INI ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick Multimedia Core Gui)
+find_package(Qt6 REQUIRED COMPONENTS Quick Multimedia Core)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -39,7 +39,6 @@ set_target_properties(appQtCamera PROPERTIES
 
 target_link_libraries(appQtCamera PRIVATE
     Qt6::Core
-        Qt6::Gui
         Qt6::Multimedia
         Qt6::Quick
 )
