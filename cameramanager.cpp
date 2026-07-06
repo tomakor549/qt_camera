@@ -104,12 +104,13 @@ void CameraManager::startRecord(const QString &directory, QString fileName) {
   QMediaFormat format;
   format.setFileFormat(QMediaFormat::MPEG4);
   format.setVideoCodec(QMediaFormat::VideoCodec::H265);
-  fileName += ".mp4";
+  _recorder.setMediaFormat(format);
 
+  fileName += ".mp4";
   const QString filePath = QDir(directory).filePath(fileName);
   _recorder.setOutputLocation(QUrl::fromLocalFile(filePath));
 
-  _recorder.setMediaFormat(format);
+  _recorder.setEncodingMode(QMediaRecorder::ConstantQualityEncoding);
   _recorder.setQuality(_quality == CameraQuality::kVeryHigh
                            ? QMediaRecorder::VeryHighQuality
                            : QMediaRecorder::NormalQuality);
@@ -137,17 +138,18 @@ void CameraManager::onVideoFrameChanged(const QVideoFrame &frame) {
 
   emit newFrameAvailable(frame);
 
-  // Format_RGB32 - alpha not needed
-  QImage image = frame.toImage();
+  // Possibly double conversion explicitly to Format_RGB32 - security, if it is
+  // already as Format_RGB32 it does not convert again
+  QImage image = frame.toImage().convertToFormat(QImage::Format_RGB32);
   emit newFrameAsImageAvailable(image);
 
   if (_recorder.recorderState() == QMediaRecorder::RecordingState) {
     setWatermark(image, 0.8);
 
     QVideoFrame frame_with_watermark(image);
-    frame_with_watermark.setStartTime(frame.startTime());
-    frame_with_watermark.setEndTime(frame.endTime());
-    frame_with_watermark.setStreamFrameRate(frame.streamFrameRate());
+    // frame_with_watermark.setStartTime(frame.startTime());
+    // frame_with_watermark.setEndTime(frame.endTime());
+    // frame_with_watermark.setStreamFrameRate(frame.streamFrameRate());
 
     _record_session.videoFrameInput()->sendVideoFrame(frame_with_watermark);
   }
