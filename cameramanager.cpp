@@ -14,11 +14,6 @@
 
 CameraManager::CameraManager(CameraQuality quality, QObject *parent)
     : QObject(parent) {
-  _watermark.load(":/logo.jpg");
-  _watermark = _watermark.scaled(300, 100, Qt::KeepAspectRatio,
-                                 Qt::SmoothTransformation);
-  _watermark.isNull() ? qDebug() << "Watermark is not loaded"
-                      : qDebug() << "Watermark loaded";
   _record_session.setRecorder(&_recorder);
   _main_session.setVideoSink(&_sink);
   _main_session.setCamera(&_camera);
@@ -115,10 +110,7 @@ void CameraManager::startRecord(const QString &directory, QString fileName) {
                            ? QMediaRecorder::VeryHighQuality
                            : QMediaRecorder::NormalQuality);
 
-  ////for QMediaFormat::VideoCodec::MPEG4
-  // _recorder.setEncodingMode(QMediaRecorder::AverageBitRateEncoding);
-  // _recorder.setVideoBitRate(
-  //     _quality == CameraQuality::kVeryHigh ? kHighBitRate : kNormalBitRate);
+  initWatermark();
 
   _recorder.record();
   qDebug() << "Recording started:" << filePath;
@@ -144,12 +136,14 @@ void CameraManager::onVideoFrameChanged(const QVideoFrame &frame) {
   emit newFrameAsImageAvailable(image);
 
   if (_recorder.recorderState() == QMediaRecorder::RecordingState) {
-    setWatermark(image, 0.8);
+    image = image.scaled(kRecordFrameSize, Qt::KeepAspectRatio,
+                         Qt::SmoothTransformation);
+    setWatermark(image, 1);
 
     QVideoFrame frame_with_watermark(image);
     // frame_with_watermark.setStartTime(frame.startTime());
     // frame_with_watermark.setEndTime(frame.endTime());
-    // frame_with_watermark.setStreamFrameRate(frame.streamFrameRate());
+    frame_with_watermark.setStreamFrameRate(frame.streamFrameRate());
 
     _record_session.videoFrameInput()->sendVideoFrame(frame_with_watermark);
   }
@@ -163,12 +157,28 @@ void CameraManager::setWatermark(QImage &image, qreal opacity) {
     QPainter painter(&image);
     painter.setOpacity(opacity);
 
-    int x = image.width() - _watermark.width() - 20;
-    int y = image.height() - _watermark.height() - 20;
+    int x = image.width() - _watermark.width() -
+            _watermark_right_down_margins.width();
+    int y = image.height() - _watermark.height() -
+            _watermark_right_down_margins.height();
 
     painter.drawImage(x, y, _watermark);
     painter.end();
   }
+}
+
+void CameraManager::initWatermark(const QString &watermarkPath,
+                                  int rightEdgeMargin, int downEdgeMargin,
+                                  int watermarkHeight) {
+  _watermark.load(watermarkPath);
+  if (_watermark.isNull()) {
+    qDebug() << "Failed to load watermark from path:" << watermarkPath;
+    return;
+  }
+  const int watermark_width =
+      (_watermark.width() * watermarkHeight) / _watermark.height();
+  _watermark = _watermark.scaled(watermark_width, watermarkHeight,
+                                 Qt::KeepAspectRatio, Qt::SmoothTransformation);
 }
 
 QCameraFormat

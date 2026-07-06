@@ -45,6 +45,7 @@ private slots:
   void onVideoFrameChanged(const QVideoFrame &frame);
 
 private:
+  const QSize kRecordFrameSize{kRecordFrameWidth, kRecordFrameHeight};
   CameraQuality _quality;
   QCamera _camera;
   QMediaCaptureSession _main_session;
@@ -53,28 +54,34 @@ private:
   QVideoSink _sink;
   QMediaRecorder _recorder;
   QVideoFrameInput _frame_input;
+
+  // watermark
   QImage _watermark;
+  QSize _watermark_right_down_margins;
 
   QPointer<QVideoSink> _preview_video_sink = nullptr;
 
   void setWatermark(QImage &image, qreal opacity = 1.0);
+  void initWatermark(const QString &watermarkPath = ":/logo.jpg",
+                     int rightEdgeMargin = 20, int downEdgeMargin = 20,
+                     int watermarkHeight = kRecordFrameHeight / 8);
+
   static QCameraFormat findBaseCompatibleFormat(QList<QCameraFormat> formats);
   static QCameraFormat findHighCompatibleFormat(QList<QCameraFormat> formats);
+
+  static constexpr int kRecordFrameWidth = 1080;
+  static constexpr int kRecordFrameHeight = 720;
 
   static constexpr int kMaximumNormalFrameWidth = 1920;
   static constexpr int kMinimumNormalFrameWidth = 1080;
   static constexpr int kMaximumNormalFrameHeight = 1080;
   static constexpr int kMinimumNormalFrameHeight = 720;
-  static constexpr int kNormalBitRate = 8000000; // 8 Mbps
 
   static constexpr int kMaximumHighFrameWidth = 2592;
   static constexpr int kMinimumHighFrameWidth = 2560;
   static constexpr int kMaximumHighFrameHeight = 1944;
   static constexpr int kMinimumHighFrameHeight = 1440;
-  static constexpr int kHighBitRate = 16000000; // 16 Mbps
 
   static constexpr QVideoFrameFormat::PixelFormat kStandardVideoFormat =
       QVideoFrameFormat::Format_Jpeg;
-  static constexpr QVideoFrameFormat::PixelFormat kNvidiaFormat =
-      QVideoFrameFormat::Format_NV12;
 };
